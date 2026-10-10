@@ -1,5 +1,6 @@
 import calendar
-import json
+import json 
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -9,7 +10,13 @@ st.set_page_config(page_title="Crop Yield Forecast", page_icon="🌾", layout="w
 
 @st.cache_resource
 def load():
-    return json.load(open("artifacts/forecast_model.json"))
+    here = Path(__file__).parent
+    for folder in (here / "artifacts", here.parent / "artifacts", Path("artifacts")):
+        f = folder / "forecast_model.json"
+        if f.exists():
+            return json.load(open(f))
+    st.error("forecast_model.json not found. Put it in an 'artifacts' folder next to app.py.")
+    st.stop()
 
 
 A = load()
