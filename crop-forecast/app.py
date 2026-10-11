@@ -102,16 +102,15 @@ if page == "Forecast":
     label = f"{mon:02d}-{day:02d}"
     model = A["models"][label]
 
-    mode = st.radio("Trend after 2017 (no yield data beyond 2017)",
-                    ["Flat after 2017", "Damped trend"], horizontal=True,
-                    help="Flat: no further trend. Damped: the 2007-2017 trend continues but fades by 20% each year.")
+    # Trend after 2017 (no yield data beyond 2017): the 2007-2017 trend continues but fades by 20% each year.
+    mode = "Damped trend"
     tp = trend_pct(model, crop)
     if year > LAST_OBS:
         st.info(f"Projection year: the fitted 2007-2017 trend for {crop.title()} is {tp:+.1f}% per year. "
                 f"Bands widen by x{horizon_factor(year):.2f} because the year is outside the data.")
         if abs(tp) > 5:
-            st.warning("This crop's fitted trend is very steep for only 11 years. Do not use the damped option "
-                       "for it.")
+            st.warning("This crop's fitted trend is very steep for only 11 years. Treat its projections beyond "
+                       "2017 with extra caution.")
 
     x = {}
     if model["weather_scale"] > 0:
@@ -179,7 +178,7 @@ else:
 - **Validation leakage:** only earlier years are used to predict a later year.
 - **Preprocessing leakage:** scaling, crop statistics and the weather penalty are fitted inside each training window.
 - **Feature-selection bias:** the feature set was fixed in advance (to-date means over three season windows).
-- **Trend extrapolation:** the trend is flat after 2017 by default. A damped option is available but unvalidated.
+- **Trend extrapolation:** after 2017 the fitted trend is damped (it fades by 20% each year). This is unvalidated, as there is no yield data beyond 2017.
 - **Interval calibration:** back-test coverage of the 80% range was about 72%. Bands are widened to match, and
   widened further for years beyond the data (OLS prediction-interval ratio, a heuristic).
 
